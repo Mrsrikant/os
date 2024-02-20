@@ -1,0 +1,29 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+int main(){
+    pid_t child_pid;
+    int status;
+    child_pid=fork();
+    if(child_pid<0){
+        perror("Fork Failed");
+        exit(1);
+    }
+    else if(child_pid==0){
+        printf("Child process (PID: %d) is running",getpid());
+        char *args[]={"/bin/ls","ls",NULL};
+        execvp(args[0],args);
+        perror("Exec Failed");
+        exit(1);
+    }
+    else{
+        printf("Parent process (PID: %d) is waiting child to complete",getpid());
+        wait(&status);
+        if(WTFEXITED(status)){
+            printf("Child process(PID:%d) has completed process within process %d",child_pid,WEXITSTATUS(status));
+        }
+        return 0;
+    }
+}
